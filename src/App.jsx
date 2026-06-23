@@ -7,7 +7,7 @@ export default function App() {
   const [niche, setNiche] = useState('finance');
   const [contentType, setContentType] = useState('original');
 
-  // New Chat & Update States
+  // Chat & Hugging Face API States
   const [apiKey, setApiKey] = useState('');
   const [chatInput, setChatInput] = useState('');
   const [chatLog, setChatLog] = useState([
@@ -43,12 +43,12 @@ export default function App() {
     }
   };
 
-  // DeepSeek Chat Function
+  // Hugging Face Free Chat Function
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
     if (!apiKey.trim()) {
-      alert("⚠️ ကျေးဇူးပြု၍ DeepSeek API Key ကို အရင်ထည့်ပေးပါ။");
+      alert("⚠️ ကျေးဇူးပြု၍ Hugging Face Token/API Key ကို အရင်ထည့်ပေးပါ။");
       return;
     }
 
@@ -57,44 +57,44 @@ export default function App() {
     setChatInput('');
     setIsLoading(true);
 
-    let systemContext = "You are a professional YouTube Monetization Mentor AI.";
+    let systemContext = "You are a professional YouTube Monetization Mentor AI. Always respond in Myanmar language based on context.";
     if (uploadedFiles.length > 0) {
       systemContext += ` User uploaded knowledge: ${uploadedFiles.map(f => f.content).join(" ")}`;
     }
 
     try {
-const response = await fetch('https://api.deepseek.com/chat/completions', {
+      // 100% Free Meta Llama 3 8B Model via Hugging Face Server
+      const response = await fetch('https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'deepseek-chat',
-          messages: [
-            { role: 'system', content: systemContext },
-            ...chatLog,
-            userMessage
-          ],
-          stream: false
+          inputs: `<|system|>\n${systemContext}\n<|user|>\n${userMessage.content}\n<|assistant|>\n`,
+          parameters: { max_new_tokens: 1000, return_full_text: false }
         })
       });
 
       const data = await response.json();
-      if (data.choices && data.choices[0]) {
-        setChatLog((prev) => [...prev, { role: 'assistant', content: data.choices[0].message.content }]);
+      
+      // Extract response safely based on Hugging Face API formatting
+      if (data && data[0] && data[0].generated_text) {
+        setChatLog((prev) => [...prev, { role: 'assistant', content: data[0].generated_text.trim() }]);
+      } else if (data && data.generated_text) {
+        setChatLog((prev) => [...prev, { role: 'assistant', content: data.generated_text.trim() }]);
       } else {
-        throw new Error("Invalid response structure");
+        throw new Error("Invalid Response Structure");
       }
     } catch (error) {
       console.error(error);
-      setChatLog((prev) => [...prev, { role: 'assistant', content: '❌ API ချိတ်ဆက်မှု အဆင်မပြေပါ။ Key မှန်ကန်မှု ရှိမရှိ သို့မဟုတ် Network ကို ပြန်စစ်ပေးပါ။' }]);
+      setChatLog((prev) => [...prev, { role: 'assistant', content: '❌ API ချိတ်ဆက်မှု အဆင်မပြေပါ။ Hugging Face Token မှန်ကန်မှု ရှိမရှိ ပြန်စစ်ပေးပါ။' }]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handle Add Files File Upload
+  // Handle File Upload
   const handleFileUpload = (e) => {
     const files = Array.from(e.target.files);
     files.forEach(file => {
@@ -115,11 +115,10 @@ const response = await fetch('https://api.deepseek.com/chat/completions', {
   const nicheData = {
     finance: { name: "Finance & Crypto", rpm: "$20 - $40", strategy: "SaaS & Affiliate Links ကို Top Pinned Comment မှာ ထည့်ပါ။ High RPM ရရှိသည်။" },
     tech: { name: "Tech & Software Tutorials", rpm: "$10 - $25", strategy: "ရက် ၃၀ အတွင်း Outlier Videos များကို ရှာဖွေပြီး Title Pattern ကို Reverse-Engineer လုပ်ပါ။" },
-    bible: { name: "Faceless Bible / Stories", rpm: "$3 - $8", strategy: "AI Slop မဖြစ်စေရန် စာသားများကို ကိုယ်တိုင်ရေးပါ၊ တည်းဖြတ်မှု Timeline ကို သေချာပြောင်းလဲပါ။" },
+    bible: { name: "Faceless Bible / Stories", rpm: "$3 - $8", strategy: "AI Slop မဖြစ်စေရန် สာသားများကို ကိုယ်တိုင်ရေးပါ၊ တည်းဖြတ်မှု Timeline ကို သေချာပြောင်းလဲပါ။" },
     gaming: { name: "Gaming & Compilations", rpm: "$1 - $4", strategy: "Reused Content ပေါ်လစီ ငြိရန် အလားအလာ အလွန်များသဖြင့် ကိုယ်ပိုင်အသံ (Voiceover) ၇၀% မဖြစ်မနေထည့်ပါ။" }
   };
 
-  // Safeguard Variable Extraction
   const activeNicheInfo = nicheData[niche] || nicheData['finance'];
   const isOriginal = contentType === 'original';
 
@@ -136,10 +135,10 @@ const response = await fetch('https://api.deepseek.com/chat/completions', {
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <input 
             type="password" 
-            placeholder="DeepSeek API Key ထည့်ရန်" 
+            placeholder="Hugging Face Token (hf_...) ထည့်ရန်" 
             value={apiKey} 
             onChange={(e) => setApiKey(e.target.value)}
-            style={{ padding: '8px 12px', backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#fff', borderRadius: '20px', fontSize: '13px' }}
+            style={{ padding: '8px 12px', backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#fff', borderRadius: '20px', fontSize: '13px', width: '240px' }}
           />
 
           <label style={{ backgroundColor: '#2d2d2d', color: '#fff', padding: '8px 15px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -239,7 +238,7 @@ const response = await fetch('https://api.deepseek.com/chat/completions', {
                   ) : (
                     <div>
                       <b>⚠️ High Risk Warning Alert</b>
-                      <p style={{ fontSize: '13px', margin: '5px 0 0 0' }}>100% AI ဖြစ်နေသည့်အတွက် สရွက်စာတမ်း Paper Trail နှင့် တည်းဖြတ်မှုဗီဒီယိုပြသနိုင်ရန် ကြိုတင်ပြင်ဆင်ပါ။</p>
+                      <p style={{ fontSize: '13px', margin: '5px 0 0 0' }}>100% AI ဖြစ်နေသည့်အတွက် စာရွက်စာတမ်း Paper Trail နှင့် တည်းဖြတ်မှုဗီဒီယိုပြသနိုင်ရန် ကြိုတင်ပြင်ဆင်ပါ။</p>
                     </div>
                   )}
                 </div>
@@ -260,8 +259,8 @@ const response = await fetch('https://api.deepseek.com/chat/completions', {
           {/* Q&A Chat Component Section */}
           <div style={{ flex: 1, backgroundColor: '#1f1f1f', borderRadius: '8px', border: '1px solid #2a2a2a', display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: '300px' }}>
             <div style={{ backgroundColor: '#252525', padding: '10px 15px', borderBottom: '1px solid #2a2a2a', fontSize: '14px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
-              <span>💬 DeepSeek Expert Q&A Chatbox</span>
-              <span style={{ fontSize: '11px', color: '#aaa' }}>Model: deepseek-chat</span>
+              <span>💬 Free AI Expert Q&A Chatbox (Meta Llama 3)</span>
+              <span style={{ fontSize: '11px', color: '#aaa' }}>Powered by Hugging Face</span>
             </div>
 
             {/* Chat Messages Log */}
@@ -273,7 +272,7 @@ const response = await fetch('https://api.deepseek.com/chat/completions', {
               ))}
               {isLoading && (
                 <div style={{ alignSelf: 'flex-start', backgroundColor: '#2a2a2a', color: '#888', padding: '10px 14px', borderRadius: '12px', fontSize: '14px' }}>
-                  ⏳ DeepSeek စဉ်းစားနေပါသည်...
+                  ⏳ AI စဉ်းစားနေပါသည်...
                 </div>
               )}
             </div>
@@ -284,7 +283,7 @@ const response = await fetch('https://api.deepseek.com/chat/completions', {
                 type="text" 
                 value={chatInput} 
                 onChange={(e) => setChatInput(e.target.value)}
-                placeholder="မင်းသိချင်တာမှန်သမျှ မေးမြန်းနိုင်ပါတယ်... (ဥပမာ - အခုချက်ချင်း စတင်လုပ်ဆောင်လို့ရတဲ့ YouTube Video Niche က ဘာလဲ?)"
+                placeholder="မင်းသိချင်တာမှန်သမျှ မေးမြန်းနိုင်ပါတယ်... (ဥပမာ - YouTube Fan Funding အကြောင်း ရှင်းပြပါ)"
                 style={{ flex: 1, padding: '12px', backgroundColor: '#252525', border: '1px solid #333', color: '#fff', borderRadius: '6px', fontSize: '13px' }}
               />
               <button type="submit" disabled={isLoading} style={{ backgroundColor: '#FF0000', color: '#fff', border: 'none', padding: '0 20px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '14px' }}>
