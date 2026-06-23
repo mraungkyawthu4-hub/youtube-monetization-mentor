@@ -1,0 +1,17 @@
+{
+  "short_name": "YT Mentor",
+  "name": "YouTube Monetization & Policy Guidelines Mentor",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1384/1384060.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#121212",
+  "theme_color": "#FF0000",
+  "display": "standalone",
+  "orientation": "portrait"
+}
