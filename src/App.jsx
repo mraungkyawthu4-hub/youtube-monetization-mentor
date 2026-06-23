@@ -7,7 +7,7 @@ export default function App() {
   const [niche, setNiche] = useState('finance');
   const [contentType, setContentType] = useState('original');
 
-  // Chat & Hugging Face API States
+  // Chat & API States
   const [apiKey, setApiKey] = useState('');
   const [chatInput, setChatInput] = useState('');
   const [chatLog, setChatLog] = useState([
@@ -43,12 +43,12 @@ export default function App() {
     }
   };
 
-  // Hugging Face Free Chat Function
+  // OpenRouter Free Chat Function Integration
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
     if (!apiKey.trim()) {
-      alert("⚠️ ကျေးဇူးပြု၍ Hugging Face Token/API Key ကို အရင်ထည့်ပေးပါ။");
+      alert("⚠️ ကျေးဇူးပြု၍ OpenRouter API Key ကို အရင်ထည့်ပေးပါ။");
       return;
     }
 
@@ -57,38 +57,40 @@ export default function App() {
     setChatInput('');
     setIsLoading(true);
 
-    let systemContext = "You are a professional YouTube Monetization Mentor AI. Always respond in Myanmar language based on context.";
+    let systemContext = "You are a professional YouTube Monetization Mentor AI. Always respond in Myanmar language.";
     if (uploadedFiles.length > 0) {
       systemContext += ` User uploaded knowledge: ${uploadedFiles.map(f => f.content).join(" ")}`;
     }
 
     try {
-      // 100% Free Meta Llama 3 8B Model via Hugging Face Server
-      const response = await fetch('https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct', {
+      // OpenRouter REST API Request
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Authorization': `Bearer ${apiKey}`,
+          'X-Title': 'YouTube Mentor App'
         },
         body: JSON.stringify({
-          inputs: `<|system|>\n${systemContext}\n<|user|>\n${userMessage.content}\n<|assistant|>\n`,
-          parameters: { max_new_tokens: 1000, return_full_text: false }
+          model: 'google/gemma-2-9b-it:free', // လုံးဝ အလကားရသည့် စွမ်းအားမြင့် မော်ဒယ်ကို ပြောင်းလဲပေးထားပါသည်
+          messages: [
+            { role: 'system', content: systemContext },
+            { role: 'user', content: userMessage.content }
+          ]
         })
       });
 
       const data = await response.json();
       
-      // Extract response safely based on Hugging Face API formatting
-      if (data && data[0] && data[0].generated_text) {
-        setChatLog((prev) => [...prev, { role: 'assistant', content: data[0].generated_text.trim() }]);
-      } else if (data && data.generated_text) {
-        setChatLog((prev) => [...prev, { role: 'assistant', content: data.generated_text.trim() }]);
+      if (data && data.choices && data.choices[0].message.content) {
+        const aiReply = data.choices[0].message.content;
+        setChatLog((prev) => [...prev, { role: 'assistant', content: aiReply.trim() }]);
       } else {
-        throw new Error("Invalid Response Structure");
+        throw new Error("Invalid OpenRouter Response Structure");
       }
     } catch (error) {
       console.error(error);
-      setChatLog((prev) => [...prev, { role: 'assistant', content: '❌ API ချိတ်ဆက်မှု အဆင်မပြေပါ။ Hugging Face Token မှန်ကန်မှု ရှိမရှိ ပြန်စစ်ပေးပါ။' }]);
+      setChatLog((prev) => [...prev, { role: 'assistant', content: '❌ API ချိတ်ဆက်မှု အဆင်မပြေပါ။ OpenRouter Key ကို ပြန်လည်စစ်ဆေးပေးပါ။' }]);
     } finally {
       setIsLoading(false);
     }
@@ -115,7 +117,7 @@ export default function App() {
   const nicheData = {
     finance: { name: "Finance & Crypto", rpm: "$20 - $40", strategy: "SaaS & Affiliate Links ကို Top Pinned Comment မှာ ထည့်ပါ။ High RPM ရရှိသည်။" },
     tech: { name: "Tech & Software Tutorials", rpm: "$10 - $25", strategy: "ရက် ၃၀ အတွင်း Outlier Videos များကို ရှာဖွေပြီး Title Pattern ကို Reverse-Engineer လုပ်ပါ။" },
-    bible: { name: "Faceless Bible / Stories", rpm: "$3 - $8", strategy: "AI Slop မဖြစ်စေရန် สာသားများကို ကိုယ်တိုင်ရေးပါ၊ တည်းဖြတ်မှု Timeline ကို သေချာပြောင်းလဲပါ။" },
+    bible: { name: "Faceless Bible / Stories", rpm: "$3 - $8", strategy: "AI Slop မဖြစ်စေရန် စာသားများကို ကိုယ်တိုင်ရေးပါ၊ တည်းဖြတ်မှု Timeline ကို သေချာပြောင်းလဲပါ။" },
     gaming: { name: "Gaming & Compilations", rpm: "$1 - $4", strategy: "Reused Content ပေါ်လစီ ငြိရန် အလားအလာ အလွန်များသဖြင့် ကိုယ်ပိုင်အသံ (Voiceover) ၇၀% မဖြစ်မနေထည့်ပါ။" }
   };
 
@@ -135,10 +137,10 @@ export default function App() {
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <input 
             type="password" 
-            placeholder="Hugging Face Token (hf_...) ထည့်ရန်" 
+            placeholder="OpenRouter Key (sk-or-v1-...) ထည့်ရန်" 
             value={apiKey} 
             onChange={(e) => setApiKey(e.target.value)}
-            style={{ padding: '8px 12px', backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#fff', borderRadius: '20px', fontSize: '13px', width: '240px' }}
+            style={{ padding: '8px 12px', backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#fff', borderRadius: '20px', fontSize: '13px', width: '250px' }}
           />
 
           <label style={{ backgroundColor: '#2d2d2d', color: '#fff', padding: '8px 15px', borderRadius: '20px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -259,8 +261,8 @@ export default function App() {
           {/* Q&A Chat Component Section */}
           <div style={{ flex: 1, backgroundColor: '#1f1f1f', borderRadius: '8px', border: '1px solid #2a2a2a', display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: '300px' }}>
             <div style={{ backgroundColor: '#252525', padding: '10px 15px', borderBottom: '1px solid #2a2a2a', fontSize: '14px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
-              <span>💬 Free AI Expert Q&A Chatbox (Meta Llama 3)</span>
-              <span style={{ fontSize: '11px', color: '#aaa' }}>Powered by Hugging Face</span>
+              <span>💬 Free AI Expert Q&A Chatbox (Google Gemma 2 Free)</span>
+              <span style={{ fontSize: '11px', color: '#aaa' }}>Powered by OpenRouter</span>
             </div>
 
             {/* Chat Messages Log */}
