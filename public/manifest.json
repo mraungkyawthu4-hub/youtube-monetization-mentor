@@ -3,7 +3,13 @@
   "name": "YouTube Monetization & Policy Guidelines Mentor",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/1384/1384060.png",
+      "src": "/logo-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-512.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
