@@ -64,7 +64,7 @@ export default function App() {
 
     try {
       // 100% Free Meta Llama 3 8B Model via Hugging Face Server
-      const response = await fetch('https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct', {
+      const response = await fetch('https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
