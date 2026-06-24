@@ -61,18 +61,16 @@ export default function App() {
     if (uploadedFiles.length > 0) {
       systemContext += ` User uploaded knowledge: ${uploadedFiles.map(f => f.content).join(" ")}`;
     }
-
-    try {
-      // OpenRouter REST API Request
+try {
+      // OpenRouter Standard Fetch Integration
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'X-Title': 'YouTube Mentor App'
+          'Authorization': `Bearer ${apiKey.trim()}`
         },
         body: JSON.stringify({
-          model: 'google/gemma-2-9b-it:free', // လုံးဝ အလကားရသည့် စွမ်းအားမြင့် မော်ဒယ်ကို ပြောင်းလဲပေးထားပါသည်
+          model: 'google/gemma-2-9b-it:free', // လုံးဝ အလကားရသည့် မော်ဒယ်
           messages: [
             { role: 'system', content: systemContext },
             { role: 'user', content: userMessage.content }
@@ -82,15 +80,18 @@ export default function App() {
 
       const data = await response.json();
       
-      if (data && data.choices && data.choices[0].message.content) {
+      if (data && data.choices && data.choices[0].message) {
         const aiReply = data.choices[0].message.content;
         setChatLog((prev) => [...prev, { role: 'assistant', content: aiReply.trim() }]);
+      } else if (data && data.error) {
+        // OpenRouter ဘက်က ပြန်ပေးတဲ့ အမှား Message ကို တိုက်ရိုက်ဖတ်ရန်
+        throw new Error(data.error.message || "OpenRouter Error");
       } else {
-        throw new Error("Invalid OpenRouter Response Structure");
+        throw new Error("Response structure error");
       }
     } catch (error) {
       console.error(error);
-      setChatLog((prev) => [...prev, { role: 'assistant', content: '❌ API ချိတ်ဆက်မှု အဆင်မပြေပါ။ OpenRouter Key ကို ပြန်လည်စစ်ဆေးပေးပါ။' }]);
+      setChatLog((prev) => [...prev, { role: 'assistant', content: `❌ API Error: ${error.message}. အစ်ကို့ Key (sk-or-v1-...) ကို App ရဲ့ Password နေရာမှာ မှန်ကန်အောင် ပြန်ထည့်ပေးပါ။` }]);
     } finally {
       setIsLoading(false);
     }
