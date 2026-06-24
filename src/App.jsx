@@ -43,7 +43,7 @@ export default function App() {
     }
   };
 
-  // OpenRouter Free Chat Function Integration (Meta Llama 3 Free ID Version)
+  // OpenRouter Free Chat Function Integration (DeepSeek-R1 Free ID Version)
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
@@ -71,7 +71,7 @@ export default function App() {
           'Authorization': `Bearer ${apiKey.trim()}`
         },
         body: JSON.stringify({
-          model: 'meta-llama/llama-3-8b-instruct:free', // လုံးဝ အလကားရပြီး စိတ်အချရဆုံး Official Free ID သို့ ပြောင်းလဲထားပါသည်
+          model: 'deepseek/deepseek-r1-distill-llama-8b:free', // လက်ရှိ ၁၀၀% လုံးဝ အလကားရပြီး စွမ်းဆောင်ရည်အကောင်းဆုံး Free ID သို့ ပြောင်းလဲထားပါသည်
           messages: [
             { role: 'system', content: systemContext },
             { role: 'user', content: userMessage.content }
@@ -262,7 +262,7 @@ export default function App() {
           {/* Q&A Chat Component Section */}
           <div style={{ flex: 1, backgroundColor: '#1f1f1f', borderRadius: '8px', border: '1px solid #2a2a2a', display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: '300px' }}>
             <div style={{ backgroundColor: '#252525', padding: '10px 15px', borderBottom: '1px solid #2a2a2a', fontSize: '14px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
-              <span>💬 Free AI Expert Q&A Chatbox (Meta Llama 3 Free)</span>
+              <span>💬 Free AI Expert Q&A Chatbox (DeepSeek-R1 Free)</span>
               <span style={{ fontSize: '11px', color: '#aaa' }}>Powered by OpenRouter</span>
             </div>
 
