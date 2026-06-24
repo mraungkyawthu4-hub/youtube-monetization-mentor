@@ -43,7 +43,7 @@ export default function App() {
     }
   };
 
-  // OpenRouter Free Chat Function Integration
+  // OpenRouter Free Chat Function Integration (Meta Llama 3 Free ID Version)
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
@@ -61,8 +61,9 @@ export default function App() {
     if (uploadedFiles.length > 0) {
       systemContext += ` User uploaded knowledge: ${uploadedFiles.map(f => f.content).join(" ")}`;
     }
-try {
-      // OpenRouter Standard Fetch Integration
+
+    try {
+      // OpenRouter REST API Call
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -70,7 +71,7 @@ try {
           'Authorization': `Bearer ${apiKey.trim()}`
         },
         body: JSON.stringify({
-          model: 'google/gemma-2-9b-it:free', // လုံးဝ အလကားရသည့် မော်ဒယ်
+          model: 'meta-llama/llama-3-8b-instruct:free', // လုံးဝ အလကားရပြီး စိတ်အချရဆုံး Official Free ID သို့ ပြောင်းလဲထားပါသည်
           messages: [
             { role: 'system', content: systemContext },
             { role: 'user', content: userMessage.content }
@@ -84,14 +85,13 @@ try {
         const aiReply = data.choices[0].message.content;
         setChatLog((prev) => [...prev, { role: 'assistant', content: aiReply.trim() }]);
       } else if (data && data.error) {
-        // OpenRouter ဘက်က ပြန်ပေးတဲ့ အမှား Message ကို တိုက်ရိုက်ဖတ်ရန်
         throw new Error(data.error.message || "OpenRouter Error");
       } else {
         throw new Error("Response structure error");
       }
     } catch (error) {
       console.error(error);
-      setChatLog((prev) => [...prev, { role: 'assistant', content: `❌ API Error: ${error.message}. အစ်ကို့ Key (sk-or-v1-...) ကို App ရဲ့ Password နေရာမှာ မှန်ကန်အောင် ပြန်ထည့်ပေးပါ။` }]);
+      setChatLog((prev) => [...prev, { role: 'assistant', content: `❌ API Error: ${error.message}. အစ်ကို့ OpenRouter Key အသစ် (sk-or-v1-...) ကို အပေါ်က Input ကွက်လပ်မှာ ပြန်ထည့်ပြီး စမ်းကြည့်ပေးပါဗျာ။` }]);
     } finally {
       setIsLoading(false);
     }
@@ -262,7 +262,7 @@ try {
           {/* Q&A Chat Component Section */}
           <div style={{ flex: 1, backgroundColor: '#1f1f1f', borderRadius: '8px', border: '1px solid #2a2a2a', display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: '300px' }}>
             <div style={{ backgroundColor: '#252525', padding: '10px 15px', borderBottom: '1px solid #2a2a2a', fontSize: '14px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
-              <span>💬 Free AI Expert Q&A Chatbox (Google Gemma 2 Free)</span>
+              <span>💬 Free AI Expert Q&A Chatbox (Meta Llama 3 Free)</span>
               <span style={{ fontSize: '11px', color: '#aaa' }}>Powered by OpenRouter</span>
             </div>
 
